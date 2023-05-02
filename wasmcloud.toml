@@ -1,0 +1,8 @@
+name = "Rating"
+language = "rust"
+type = "actor"
+version = "0.1.0"
+
+[actor]
+claims = ["wasmcloud:httpserver", "wasmcloud:builtin:numbergen", "sigscale:prefixtables" ]
+

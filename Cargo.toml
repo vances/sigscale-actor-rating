@@ -1,0 +1,26 @@
+[package]
+name = "sigscale-rating"
+version = "0.1.0"
+authors = [ "vances@sigscale.org" ]
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+name = "rating"
+
+[dependencies]
+futures = "0.3"
+wasmbus-rpc = "0.13"
+wasmcloud-interface-httpserver = "0.10"
+wasmcloud-interface-numbergen = "0.9"
+wasmcloud-interface-keyvalue = "0.10"
+wasmcloud-interface-logging = "0.9"
+serde = "1.0"
+serde_json = "1.0"
+sigscale-interface-prefix = { path="../prefix-tables/rust" }
+
+[profile.release]
+# Optimize for small code size
+lto = true
+opt-level = "s"
+strip = true
