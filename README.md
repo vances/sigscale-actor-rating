@@ -38,14 +38,11 @@ Visit the url "http://localhost:8000" to see your response in the browser.
 ## Get the Host ID
 	wash ctl get hosts
 
-## Get invenmtory on the Host
+## Get inventory on the Host
 	wash ctl get inventory NBFQBFYA7AFZIOGZTSR5EAJGQWC4TANWCURJD4RMZT2WMH547XVZTQ6W
 
 ## Start Rating Actor
 	wash ctl start actor file:///Users/vances/rating/build/rating_s.wasm
-
-## Start Number Generator Capability Provider
-	wash ctl start provider
 
 ## Start HTTP Server Capability Provider
 	wash ctl start provider --link-name Nrf wasmcloud.azurecr.io/httpserver:0.17.0
