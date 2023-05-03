@@ -18,7 +18,7 @@ impl HttpServer for RatingActor {
 			("POST", ["ratingdata"]) => {
 					match serde_json::from_slice::<Value>(&req.body) {
 						Ok(rating_data_req) =>
-							rating_start(ctx, &rating_data_req).await,
+							rating_start(ctx, rating_data_req).await,
 						Err(error) => {
 							// error!("serde_json::from_slice {}", error);
 							Ok(HttpResponse::bad_request(error))
@@ -28,7 +28,7 @@ impl HttpServer for RatingActor {
 			("POST", ["ratingdata", _rating_data_ref, "update"]) => {
 					match serde_json::from_slice::<Value>(&req.body) {
 						Ok(rating_data_req) =>
-							rating_update(ctx, &rating_data_req).await,
+							rating_update(ctx, rating_data_req).await,
 						Err(error) => {
 							Ok(HttpResponse::bad_request(error))
 						}
@@ -37,7 +37,7 @@ impl HttpServer for RatingActor {
 			("POST", ["ratingdata", _ratingdata_ref, "release"]) => {
 					match serde_json::from_slice::<Value>(&req.body) {
 						Ok(rating_data_req) =>
-							rating_stop(ctx, &rating_data_req).await,
+							rating_stop(ctx, rating_data_req).await,
 						Err(error) => {
 							Ok(HttpResponse::bad_request(error))
 						}
@@ -56,7 +56,7 @@ impl HttpServer for RatingActor {
 	}
 }
 
-async fn rating_start(ctx: &Context, rating_data_req: &Value) -> RpcResult<HttpResponse> {
+async fn rating_start(ctx: &Context, rating_data_req: Value) -> RpcResult<HttpResponse> {
 	let address: String = "+14165551234".to_owned();
 	match NumberGenSender::new()
 			.generate_guid(ctx)
@@ -95,7 +95,7 @@ async fn rating_start(ctx: &Context, rating_data_req: &Value) -> RpcResult<HttpR
 	}
 }
 
-async fn rating_update(ctx: &Context, rating_data_req: &Value) -> RpcResult<HttpResponse> {
+async fn rating_update(ctx: &Context, rating_data_req: Value) -> RpcResult<HttpResponse> {
 	let address: String = "+14165551234".to_owned();
 	let tariff: String = "SMS".to_owned();
 	match PrefixTablesSender::new_with_link("Tariff") {
@@ -122,7 +122,7 @@ async fn rating_update(ctx: &Context, rating_data_req: &Value) -> RpcResult<Http
 	}
 }
 
-async fn rating_stop(ctx: &Context, rating_data_req: &Value) -> RpcResult<HttpResponse> {
+async fn rating_stop(ctx: &Context, rating_data_req: Value) -> RpcResult<HttpResponse> {
 	let address: String = "+14165551234".to_owned();
 	let tariff: String = "SMS".to_owned();
 	match PrefixTablesSender::new_with_link("Tariff") {
