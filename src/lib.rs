@@ -68,7 +68,7 @@ async fn rating_start(ctx: &Context, rating_data_req: &Value) -> RpcResult<HttpR
 						match prefix_provider
 								.match_prefix(ctx, &MatchPrefixRequest { name: tariff, address })
 								.await {
-							Ok(_) => {
+							Ok(MatchPrefixResponse{value: _rate, ..}) => {
 									let mut header = HeaderMap::new();
 									let mut location: String = "/ratingdata/".to_owned();
 									location.push_str(&guid);
@@ -103,7 +103,7 @@ async fn rating_update(ctx: &Context, rating_data_req: &Value) -> RpcResult<Http
 				match prefix_provider
 						.match_prefix(ctx, &MatchPrefixRequest { name: tariff, address })
 						.await {
-						Ok(_) => {
+						Ok(MatchPrefixResponse {value: _rate, ..}) => {
 								Ok(HttpResponse {
 										status_code: 200,
 										// todo: format RatingDataResponse
@@ -130,7 +130,7 @@ async fn rating_stop(ctx: &Context, rating_data_req: &Value) -> RpcResult<HttpRe
 				match prefix_provider
 						.match_prefix(ctx, &MatchPrefixRequest { name: tariff, address })
 						.await {
-						Ok(_) => {
+						Ok(MatchPrefixResponse {value: _rate, ..}) => {
 								Ok(HttpResponse {
 										status_code: 200,
 										// todo: format RatingDataResponse
