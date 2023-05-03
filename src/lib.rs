@@ -62,43 +62,59 @@ async fn rating_start(ctx: &Context, rating_data_req: &Value) -> RpcResult<HttpR
 			.generate_guid(ctx)
 			.await {
 		Ok(guid) => {
-			let tariff: String = "SMS".to_owned();
-				match PrefixTablesSender::new()
-						.match_prefix(ctx, &MatchPrefixRequest { name: tariff, address })
-						.await {
-					Ok(_) => {
-							let mut header = HeaderMap::new();
-							let mut location: String = "/ratingdata/".to_owned();
-							location.push_str(&guid);
-							header.insert("Location".to_string(), vec![location]);
-							Ok(HttpResponse {
-									status_code: 201,
-									header,
-									body: serde_json::to_vec(&rating_data_req).unwrap(),
-							})
-						}
+				let tariff: String = "SMS".to_owned();
+				match PrefixTablesSender::new_with_link("Tariff") {
+					Ok(prefix_provider) =>
+						match prefix_provider
+								.match_prefix(ctx, &MatchPrefixRequest { name: tariff, address })
+								.await {
+							Ok(_) => {
+									let mut header = HeaderMap::new();
+									let mut location: String = "/ratingdata/".to_owned();
+									location.push_str(&guid);
+									header.insert("Location".to_string(), vec![location]);
+									Ok(HttpResponse {
+											status_code: 201,
+											header,
+											// todo: format RatingDataResponse
+											body: serde_json::to_vec(&rating_data_req).unwrap(),
+									})
+								},
+							Err(error) => {
+								Ok(HttpResponse::internal_server_error(error))
+							}
+						},
 					Err(error) => {
-							Ok(HttpResponse::internal_server_error(error))
-						}
+						Ok(HttpResponse::internal_server_error(error))
+					},
 				}
 			},
 		Err(error) => {
-				Ok(HttpResponse::internal_server_error(error))
-			},
+			Ok(HttpResponse::internal_server_error(error))
+		},
 	}
 }
 
 async fn rating_update(ctx: &Context, rating_data_req: &Value) -> RpcResult<HttpResponse> {
 	let address: String = "+14165551234".to_owned();
 	let tariff: String = "SMS".to_owned();
-	match PrefixTablesSender::new()
-			.match_prefix(ctx, &MatchPrefixRequest { name: tariff, address })
-			.await {
-		Ok(_) => {
-				Ok(HttpResponse {
-						status_code: 200,
-						..Default::default()
-				})
+	match PrefixTablesSender::new_with_link("Tariff") {
+		Ok(prefix_provider) => {
+				match prefix_provider
+						.match_prefix(ctx, &MatchPrefixRequest { name: tariff, address })
+						.await {
+						Ok(_) => {
+								Ok(HttpResponse {
+										status_code: 200,
+										// todo: format RatingDataResponse
+										body: serde_json::to_vec(&rating_data_req).unwrap(),
+										..Default::default()
+								})
+							},
+						Err(error) => {
+							Ok(HttpResponse::internal_server_error(error))
+						},
+				}
 			},
 		Err(error) => {
 				Ok(HttpResponse::internal_server_error(error))
@@ -109,14 +125,23 @@ async fn rating_update(ctx: &Context, rating_data_req: &Value) -> RpcResult<Http
 async fn rating_stop(ctx: &Context, rating_data_req: &Value) -> RpcResult<HttpResponse> {
 	let address: String = "+14165551234".to_owned();
 	let tariff: String = "SMS".to_owned();
-	match PrefixTablesSender::new()
-			.match_prefix(ctx, &MatchPrefixRequest { name: tariff, address })
-			.await {
-		Ok(_) => {
-				Ok(HttpResponse {
-						status_code: 200,
-						..Default::default()
-				})
+	match PrefixTablesSender::new_with_link("Tariff") {
+		Ok(prefix_provider) => {
+				match prefix_provider
+						.match_prefix(ctx, &MatchPrefixRequest { name: tariff, address })
+						.await {
+						Ok(_) => {
+								Ok(HttpResponse {
+										status_code: 200,
+										// todo: format RatingDataResponse
+										body: serde_json::to_vec(&rating_data_req).unwrap(),
+										..Default::default()
+								})
+							},
+						Err(error) => {
+							Ok(HttpResponse::internal_server_error(error))
+						},
+				}
 			},
 		Err(error) => {
 				Ok(HttpResponse::internal_server_error(error))
