@@ -5,11 +5,14 @@ use serde::{Deserialize, Serialize};
 use sigscale_interface_prefix::{PrefixTablesSender, PrefixTables, MatchPrefixRequest, MatchPrefixResponse};
 // use wasmcloud_interface_logging::error;
 
-#[derive(Debug, Default, Actor, HealthResponder)]
+#[derive(Actor, HealthResponder, Default, Debug)]
 #[services(Actor, HttpServer)]
 struct RatingActor {}
 
-#[derive(Deserialize)]struct RatingDataRequest {
+#[derive(Deserialize, Default, Debug)]
+#[serde(default)]
+#[allow(non_snake_case)]
+struct RatingDataRequest {
 	// mandatory attributes
 	nfConsumerIdentification: NFIdentification,
 	invocationTimeStamp: String,
@@ -17,235 +20,233 @@ struct RatingActor {}
 	serviceRating: Vec<ServiceRatingRequest>,
 
 	// optional attributes
-	#[serde(default)]
-	subscriptionId: Vec<String>,
-	#[serde(default)]
-	tenantIdentifier: String,
-	#[serde(default)]
-	mnSConsumerIdentifier: String,
-	#[serde(default)]
-	beginTimeStamp: String,
-	#[serde(default)]
-	oneTimeEvent: bool,
-	#[serde(default)]
-	oneTimeEventType: String,
+	subscriptionId: Option<Vec<String>>,
+	tenantIdentifier: Option<String>,
+	mnSConsumerIdentifier: Option<String>,
+	beginTimeStamp: Option<String>,
+	oneTimeEvent: Option<bool>,
+	oneTimeEventType: Option<String>,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Default, Debug)]
+#[serde(default)]
+#[allow(non_snake_case)]
 struct NFIdentification {
 	// mandatory attributes
 	nodeFunctionality: String,
 
 	// optional attributes
-	#[serde(default)]
-	nFName: String,
-	#[serde(default)]
-	nFIPv4Address: String,
-	#[serde(default)]
-	nFIPv6Address: String,
-	#[serde(default)]
-	nFPLMNID: PlmnId,
-	#[serde(default)]
-	nFFqdn: String,
+	#[serde(skip_serializing_if = "Option::is_none")]
+	nFName: Option<String>,
+	#[serde(skip_serializing_if = "Option::is_none")]
+	nFIPv4Address: Option<String>,
+	#[serde(skip_serializing_if = "Option::is_none")]
+	nFIPv6Address: Option<String>,
+	#[serde(skip_serializing_if = "Option::is_none")]
+	nFPLMNID: Option<PlmnId>,
+	#[serde(skip_serializing_if = "Option::is_none")]
+	nFFqdn: Option<String>,
 }
 
-#[derive(Deserialize)]
-#[serde(default)]
+#[derive(Deserialize, Default, Debug)]
 struct PlmnId {
 	// namdatory attributes
 	mcc: String,
 	mnc: String,
 }
-impl Default for PlmnId {
-	fn default() -> Self {
-		PlmnId {
-			mcc: "001".to_string(),
-			mnc: "001".to_string(),
-		}
-	}
-}
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Default, Debug)]
+#[serde(default)]
+#[allow(non_snake_case)]
 struct ServiceRatingRequest {
 	// optional attributes
-	#[serde(default)]
-	serviceId: u32,
-	#[serde(default)]
-	ratingGroup: u32,
-	#[serde(default)]
-	originationId: Vec<OriginationId>,
-	#[serde(default)]
-	destinationId: Vec<DestinationId>,
-	#[serde(default)]
-	serviceContextId: String,
-//	#[serde(default)]
-//	serviceInformation: ServiceInformation,
-//	#[serde(default)]
-//	counter: Vec<Counter>
-	#[serde(default)]
-	basicPriceTimeStamp: String,
-	#[serde(default)]
-	requestSubType: String,
-	#[serde(default)]
-	requestedUnit: RequestedUnit,
-	#[serde(default)]
-	consumedUnit: ConsumedUnit,
-	#[serde(default)]
-	consumedUnitAfterTariffSwitch: ConsumedUnit,
+	serviceId: Option<u32>,
+	ratingGroup: Option<u32>,
+	originationId: Option<Vec<OriginationId>>,
+	destinationId: Option<Vec<DestinationId>>,
+	serviceContextId: Option<String>,
+//	serviceInformation: Option<ServiceInformation>,
+//	counter: Option<Vec<Counter>>,
+	basicPriceTimeStamp: Option<String>,
+	requestSubType: Option<String>,
+	requestedUnit: Option<RequestedUnit>,
+	consumedUnit: Option<ConsumedUnit>,
+	consumedUnitAfterTariffSwitch: Option<ConsumedUnit>,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Debug)]
+#[allow(non_snake_case)]
 struct OriginationId {
 	// namdatory attributes
 	originationIdType: String,
 	originationIdData: String,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Debug)]
+#[allow(non_snake_case)]
 struct DestinationId {
 	// namdatory attributes
 	destinationIdType: String,
 	destinationIdData: String,
 }
 
-#[derive(Deserialize)]
-#[derive(Default)]
-#[serde(default)]
+#[derive(Deserialize, Default, Debug)]
+#[allow(non_snake_case)]
 struct RequestedUnit {
 	// optional attributes
-	time: u32,
-	totalVolume: u64,
-	uplinkVolume: u64,
-	downlinkVolume: u64,
-	serviceSpecificUnit: u64,
+	time: Option<u32>,
+	totalVolume: Option<u64>,
+	uplinkVolume: Option<u64>,
+	downlinkVolume: Option<u64>,
+	serviceSpecificUnit: Option<u64>,
 }
 
-#[derive(Serialize)]
-#[serde(default)]
+#[derive(Serialize, Default, Debug)]
+#[allow(non_snake_case)]
 struct GrantedUnit {
-	time: u32,
-	totalVolume: u64,
-	uplinkVolume: u64,
-	downlinkVolume: u64,
-	serviceSpecificUnit: u64,
+	// optional attributes
+	#[serde(skip_serializing_if = "Option::is_none")]
+	time: Option<u32>,
+	#[serde(skip_serializing_if = "Option::is_none")]
+	totalVolume: Option<u64>,
+	#[serde(skip_serializing_if = "Option::is_none")]
+	uplinkVolume: Option<u64>,
+	#[serde(skip_serializing_if = "Option::is_none")]
+	downlinkVolume: Option<u64>,
+	#[serde(skip_serializing_if = "Option::is_none")]
+	serviceSpecificUnit: Option<u64>,
 }
 
-#[derive(Deserialize)]
-#[derive(Default)]
-#[serde(default)]
+#[derive(Deserialize, Default, Debug)]
+#[allow(non_snake_case)]
 struct ConsumedUnit {
-	time: u32,
-	totalVolume: u64,
-	uplinkVolume: u64,
-	downlinkVolume: u64,
-	serviceSpecificUnit: u64,
+	// optional attributes
+	#[serde(skip_serializing_if = "Option::is_none")]
+	time: Option<u32>,
+	#[serde(skip_serializing_if = "Option::is_none")]
+	totalVolume: Option<u64>,
+	#[serde(skip_serializing_if = "Option::is_none")]
+	uplinkVolume: Option<u64>,
+	#[serde(skip_serializing_if = "Option::is_none")]
+	downlinkVolume: Option<u64>,
+	#[serde(skip_serializing_if = "Option::is_none")]
+	serviceSpecificUnit: Option<u64>,
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, Default, Debug)]
+#[allow(non_snake_case)]
 struct RatingDataResponse {
 	// mandatory attributes
 	invocationTimeStamp: String,
 	invocationSequenceNumber: u32,
-	invocationResult: InvocationResult,
 	serviceRating: Vec<ServiceRatingResult>,
+
+	// optional attributes
+	#[serde(skip_serializing_if = "Option::is_none")]
+	invocationResult: Option<InvocationResult>,
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, Default, Debug)]
+#[allow(non_snake_case)]
 struct ServiceRatingResult {
 	// mandatory attributes
 	resultCode: String,
 
 	// optional attributes
-	#[serde(default)]
-	serviceId: u32,
-	#[serde(default)]
-	ratingGroup: u32,
-	#[serde(default)]
-	serviceContextId: String,
-	#[serde(default)]
-	grantedUnit: GrantedUnit,
-	#[serde(default)]
-	basicPrice: Price,
-	#[serde(default)]
-	price: Price,
-	#[serde(default)]
-	billingInfo: String,
-//	#[serde(default)]
-//	counterPrice: Vec<CounterPrice>
-//	#[serde(default)]
-//	impactOnCounter: Vec<ImpactOnCounter>,
-//	#[serde(default)]
-//	tariffSwitchTime: u32,
-//	#[serde(default)]
-//	currentTariff: Tariff,
-//	#[serde(default)]
-//	nextTariff: Tariff,
-//	#[serde(default)]
-//	expiryTime: u32,
-//	#[serde(default)]
-//	validUnits: u64,
-//	#[serde(default)]
-//	tariffAfterValidUnits: Tariff,
-//	#[serde(default)]
-//	counterTariff: Vec<CounterTariff>,
-//	#[serde(default)]
-//	requestedCounter: Vec<u32>,
+	#[serde(skip_serializing_if = "Option::is_none")]
+	serviceId: Option<u32>,
+	#[serde(skip_serializing_if = "Option::is_none")]
+	ratingGroup: Option<u32>,
+	#[serde(skip_serializing_if = "Option::is_none")]
+	serviceContextId: Option<String>,
+	#[serde(skip_serializing_if = "Option::is_none")]
+	grantedUnit: Option<GrantedUnit>,
+	#[serde(skip_serializing_if = "Option::is_none")]
+	basicPrice: Option<Price>,
+	#[serde(skip_serializing_if = "Option::is_none")]
+	price: Option<Price>,
+	#[serde(skip_serializing_if = "Option::is_none")]
+	billingInfo: Option<String>,
+//	#[serde(skip_serializing_if = "Option::is_none")]
+//	counterPrice: Option<Vec<CounterPrice>>
+//	#[serde(skip_serializing_if = "Option::is_none")]
+//	impactOnCounter: Option<Vec<ImpactOnCounter>>,
+//	#[serde(skip_serializing_if = "Option::is_none")]
+//	tariffSwitchTime: Option<u32>,
+//	#[serde(skip_serializing_if = "Option::is_none")]
+//	currentTariff: Option<Tariff>,
+//	#[serde(skip_serializing_if = "Option::is_none")]
+//	nextTariff: Option<Tariff>,
+//	#[serde(skip_serializing_if = "Option::is_none")]
+//	expiryTime: Option<u32>,
+//	#[serde(skip_serializing_if = "Option::is_none")]
+//	validUnits: Option<u64>,
+//	#[serde(skip_serializing_if = "Option::is_none")]
+//	tariffAfterValidUnits: Option<Tariff,
+//	#[serde(skip_serializing_if = "Option::is_none")]
+//	counterTariff: Option<Vec<CounterTariff>>,
+//	#[serde(skip_serializing_if = "Option::is_none")]
+//	requestedCounter: Option<Vec<u32>>,
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, Default, Debug)]
+#[allow(non_snake_case)]
 struct Price {
 	// mandatory attributes
 	amount: UnitValue,
 
 	// optional attributes
-//	#[serde(default)]
-//	currencyCode: CurrencyCode,
+//	#[serde(skip_serializing_if = "Option::is_none")]
+//	currencyCode: Option<CurrencyCode>,
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, Default, Debug)]
+#[allow(non_snake_case)]
 struct UnitValue {
 	// mandatory attributes
 	valueDigits: u64,
 
 	// optional attributes
-	#[serde(default)]
-	exponent: i32,
+	#[serde(skip_serializing_if = "Option::is_none")]
+	exponent: Option<i32>,
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, Default, Debug)]
+#[allow(non_snake_case)]
 struct InvocationResult {
 	// optional attributes
-	#[serde(default)]
-	error: ProblemDetails,
-	#[serde(default)]
-	failureHandling: String,
+	#[serde(skip_serializing_if = "Option::is_none")]
+	error: Option<ProblemDetails>,
+	#[serde(skip_serializing_if = "Option::is_none")]
+	failureHandling: Option<String>,
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, Default, Debug)]
+#[allow(non_snake_case)]
 struct ProblemDetails {
 	// mandatory attributes
 	r#type: String,
 
 	// optional attributes
-	#[serde(default)]
-	title: String,
-	#[serde(default)]
-	status: u16,
-	#[serde(default)]
-	detail: String,
-	#[serde(default)]
-	instance: String,
-	#[serde(default)]
-	cause: String,
-	#[serde(default)]
-	invalidParams: Vec<InvalidParam>,
-	#[serde(default)]
-	supportedFeatures: String,
-	#[serde(default)]
-	targetScp: String,
+	#[serde(skip_serializing_if = "Option::is_none")]
+	title: Option<String>,
+	#[serde(skip_serializing_if = "Option::is_none")]
+	status: Option<u16>,
+	#[serde(skip_serializing_if = "Option::is_none")]
+	detail: Option<String>,
+	#[serde(skip_serializing_if = "Option::is_none")]
+	instance: Option<String>,
+	#[serde(skip_serializing_if = "Option::is_none")]
+	cause: Option<String>,
+	#[serde(skip_serializing_if = "Option::is_none")]
+	invalidParams: Option<Vec<InvalidParam>>,
+	#[serde(skip_serializing_if = "Option::is_none")]
+	supportedFeatures: Option<String>,
+	#[serde(skip_serializing_if = "Option::is_none")]
+	targetScp: Option<String>,
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, Default, Debug)]
 struct InvalidParam {
 	// mandatory attributes
 	param: String,
@@ -300,6 +301,11 @@ impl HttpServer for RatingActor {
 }
 
 async fn rating_start(ctx: &Context, rating_data_req: RatingDataRequest) -> RpcResult<HttpResponse> {
+	let rating_data_res = RatingDataResponse {
+		invocationTimeStamp: rating_data_req.invocationTimeStamp,
+		invocationSequenceNumber: rating_data_req.invocationSequenceNumber,
+		..Default::default()
+	};
 	let address: String = "+14165551234".to_owned();
 	match NumberGenSender::new()
 			.generate_guid(ctx)
@@ -319,9 +325,7 @@ async fn rating_start(ctx: &Context, rating_data_req: RatingDataRequest) -> RpcR
 									Ok(HttpResponse {
 											status_code: 201,
 											header,
-											// todo: format RatingDataResponse
-											// body: serde_json::to_vec(&rating_data_req).unwrap(),
-											..Default::default()
+											body: serde_json::to_vec(&rating_data_res).unwrap()
 									})
 								},
 							Err(error) => {
@@ -351,7 +355,6 @@ async fn rating_update(ctx: &Context, rating_data_req: RatingDataRequest) -> Rpc
 								Ok(HttpResponse {
 										status_code: 200,
 										// todo: format RatingDataResponse
-										// body: serde_json::to_vec(&rating_data_req).unwrap(),
 										..Default::default()
 								})
 							},
@@ -378,7 +381,6 @@ async fn rating_stop(ctx: &Context, rating_data_req: RatingDataRequest) -> RpcRe
 								Ok(HttpResponse {
 										status_code: 200,
 										// todo: format RatingDataResponse
-										// body: serde_json::to_vec(&rating_data_req).unwrap(),
 										..Default::default()
 								})
 							},
