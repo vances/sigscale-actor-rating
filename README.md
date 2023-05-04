@@ -42,7 +42,7 @@ Visit the url "http://localhost:8000" to see your response in the browser.
 	wash ctl get inventory NBFQBFYA7AFZIOGZTSR5EAJGQWC4TANWCURJD4RMZT2WMH547XVZTQ6W
 
 ## Start Rating Actor
-	wash ctl start actor file:///Users/vances/rating/build/rating_s.wasm
+	wash ctl start actor file:///Users/vances/sigscale-actor-rating/build/rating_s.wasm
 
 ## Start HTTP Server Capability Provider
 	wash ctl start provider --link-name Nrf wasmcloud.azurecr.io/httpserver:0.17.0
@@ -51,7 +51,7 @@ Visit the url "http://localhost:8000" to see your response in the browser.
 	wash ctl link put --link-name Nrf MD44U6Y2DXLMRL2GUWSK5SRBXQ3KPPEUSNNIK6XY4BJUEPXQWHI5NERX VAG3QITQQ2ODAOWB5TTQSDJ53XK3SHBEIFNK4AYJ5RKAX2UNSCAPHA5M  wasmcloud:httpserver
 
 ## Start Prefix Tables Capability Provider (fails)
-	wash ctl start provider --link-name Tariff file:///Users/vances/prefixtables-provider/build/prefixtables_provider.par.gz
+	wash ctl start provider --link-name Tariff file:///Users/vances/sigscale-provider-prefix/build/prefixtables_provider.par.gz
 
 ## Add Tariff Link Definition
 	wash ctl link put --link-name Tariff MD44U6Y2DXLMRL2GUWSK5SRBXQ3KPPEUSNNIK6XY4BJUEPXQWHI5NERX VCJD5DQJVK4OBNQ7LIIMIUXZUGIH72LSEDCQKWF26FGELFOVIKZ53KNX sigscale:prefixtables
