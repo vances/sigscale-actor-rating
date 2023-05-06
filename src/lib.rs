@@ -117,7 +117,7 @@ struct GrantedUnit {
 	serviceSpecificUnit: Option<u64>,
 }
 
-#[derive(Deserialize, Default, Debug)]
+#[derive(Serialize, Deserialize, Default, Debug)]
 #[allow(non_snake_case)]
 struct ConsumedUnit {
 	// optional attributes
@@ -161,6 +161,8 @@ struct ServiceRatingResult {
 	serviceContextId: Option<String>,
 	#[serde(skip_serializing_if = "Option::is_none")]
 	grantedUnit: Option<GrantedUnit>,
+	#[serde(skip_serializing_if = "Option::is_none")]
+	consumedUnit: Option<ConsumedUnit>,
 	#[serde(skip_serializing_if = "Option::is_none")]
 	basicPrice: Option<Price>,
 	#[serde(skip_serializing_if = "Option::is_none")]
@@ -293,19 +295,43 @@ impl HttpServer for RatingActor {
 }
 
 async fn rating_start(ctx: &Context, rating_data_req: RatingDataRequest) -> RpcResult<HttpResponse> {
-	let rating_data_res = RatingDataResponse {
+	let mut rating_data_res = RatingDataResponse {
 		invocationTimeStamp: rating_data_req.invocationTimeStamp,
 		invocationSequenceNumber: rating_data_req.invocationSequenceNumber,
 		..Default::default()
 	};
-	let address: String = "+14165551234".to_owned();
+	let mut service_rating_res = match &rating_data_req.serviceRating {
+		service_rating_req if service_rating_req.len() == 1 =>
+			ServiceRatingResult {
+					serviceId: service_rating_req[0].serviceId.clone(),
+					ratingGroup: service_rating_req[0].ratingGroup.clone(),
+					serviceContextId: service_rating_req[0].serviceContextId.clone(),
+					..Default::default()
+			},
+		service_rating_req if service_rating_req.is_empty() =>
+			return Ok(HttpResponse::bad_request("EmptyserviceRating")),
+		service_rating_req if service_rating_req.len() > 1 =>
+			return Ok(HttpResponse::bad_request("Too many serviceRating")),
+		_service_rating_req =>
+			return Ok(HttpResponse::bad_request("Missing serviceRating")),
+	};
+	let address = match &rating_data_req.serviceRating[0].destinationId {
+		Some(addresses) if addresses.len() == 1 =>
+			addresses[0].destinationIdData.to_string(),
+		Some(addresses) if addresses.is_empty() =>
+			return Ok(HttpResponse::bad_request("Missing destinationId")),
+		Some(addresses) =>
+			return Ok(HttpResponse::bad_request("Too many detinationId")),
+		None =>
+			return Ok(HttpResponse::bad_request("Missing serviceRating")),
+	};
 	let rating_data_ref: String = match NumberGenSender::new()
 			.generate_guid(ctx)
 			.await {
 		Ok(guid) => guid,
 		Err(error) => return Ok(HttpResponse::internal_server_error(error)),
 	};
-	let tariff: String = "SMS".to_owned();
+	let tariff = String::from("SMS");
 	let prefix_provider = match PrefixTablesSender::new_with_link("Tariff") {
 		Ok(provider) => provider,
 		Err(error) => return Ok(HttpResponse::internal_server_error(error)),
@@ -313,11 +339,24 @@ async fn rating_start(ctx: &Context, rating_data_req: RatingDataRequest) -> RpcR
 	match prefix_provider
 			.match_prefix(ctx, &MatchPrefixRequest { name: tariff, address })
 			.await {
-		Ok(MatchPrefixResponse{value: _rate, ..}) => {
+		Ok(MatchPrefixResponse{value: rate, ..}) => {
 				let mut header = HeaderMap::new();
-				let mut location: String = "/ratingdata/".to_owned();
+				let mut location = String::from("/ratingdata/");
 				location.push_str(&rating_data_ref);
 				header.insert("Location".to_string(), vec![location]);
+				service_rating_res.resultCode = String::from("SUCCESS");
+				service_rating_res.price = Some(Price {
+					amount: UnitValue {
+						valueDigits: rate,
+						..Default::default()
+					},
+					..Default::default()
+				});
+				service_rating_res.consumedUnit = Some(ConsumedUnit {
+					serviceSpecificUnit: Some(1),
+					..Default::default()
+				});
+				rating_data_res.serviceRating.push(service_rating_res);
 				Ok(HttpResponse {
 						status_code: 201,
 						header,
@@ -330,8 +369,8 @@ async fn rating_start(ctx: &Context, rating_data_req: RatingDataRequest) -> RpcR
 }
 
 async fn rating_update(ctx: &Context, _rating_data_req: RatingDataRequest) -> RpcResult<HttpResponse> {
-	let address: String = "+14165551234".to_owned();
-	let tariff: String = "SMS".to_owned();
+	let address = String::from("+14165551234");
+	let tariff = String::from("SMS");
 	let prefix_provider = match PrefixTablesSender::new_with_link("Tariff") {
 		Ok(provider) => provider,
 		Err(error) => return Ok(HttpResponse::internal_server_error(error)),
@@ -351,8 +390,8 @@ async fn rating_update(ctx: &Context, _rating_data_req: RatingDataRequest) -> Rp
 }
 
 async fn rating_stop(ctx: &Context, _rating_data_req: RatingDataRequest) -> RpcResult<HttpResponse> {
-	let address: String = "+14165551234".to_owned();
-	let tariff: String = "SMS".to_owned();
+	let address = String::from("+14165551234");
+	let tariff = String::from("SMS");
 	let prefix_provider = match PrefixTablesSender::new_with_link("Tariff") {
 		Ok(provider) => provider,
 		Err(error) => return Ok(HttpResponse::internal_server_error(error)),

@@ -14,8 +14,7 @@ REQTYPE="\"requestSubType\":\"DEBIT\""
 SERVICERATING="\"serviceRating\":[{$CONTEXT,$SERVICE,$DESTINATION,$REQTYPE}]"
 DATA="{$TIMESTAMP,$SEQUENCE,$CONSUMER,$SUBSCRIBER,$EVENT,$EVENTTYPE,$SERVICERATING}"
 
-curl -v \
-		-H "Content-Type: application/json" \
+curl -s -H "Content-Type: application/json" \
 		-H "Accept: application/json, application/problem+json" \
 		--data "${DATA}" \
 		http://localhost:8000/ratingdata

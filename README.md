@@ -59,3 +59,25 @@ Visit the url "http://localhost:8000" to see your response in the browser.
 ## Connect to the wasmcloud_host node
 	erl -sname $LOGNAME -setcookie GYSX7CS5XWALTBRM4CKFLFLIB2OM5ARSMIG4L52XZQH22GEPQEJQ==== -remsh wasmcloud_host
 
+## Test
+	./rate.sh | json_pp
+	{
+	   "invocationSequenceNumber" : 29086,
+	   "invocationTimeStamp" : "2023-05-06T21:55:41+08:00",
+	   "serviceRating" : [
+	      {
+	         "consumedUnit" : {
+	            "serviceSpecificUnit" : 1
+	         },
+	         "price" : {
+	            "amount" : {
+	               "valueDigits" : 0
+	            }
+	         },
+	         "resultCode" : "SUCCESS",
+	         "serviceContextId" : "32274@3gpp.org",
+	         "serviceId" : 4
+	      }
+	   ]
+	}
+
